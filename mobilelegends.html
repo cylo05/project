@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GUESS ML HERO</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap');
+
+    body {
+      font-family: 'Rubik', sans-serif;
+      text-align: center;
+      background: linear-gradient(135deg, #1e1e2f, #3e4a89);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+
+    .home-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: #ffd700;
+      border: none;
+      border-radius: 50%;
+      padding: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, background-color 0.3s ease;
+      z-index: 999;
+    }
+
+    .home-button:hover {
+      background-color: #ffc107;
+      transform: scale(1.1);
+    }
+
+    .container {
+      background: #ffffff10;
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      margin: 50px auto;
+      max-width: 600px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+      color: #fff;
+    }
+
+    #description {
+      font-size: 18px;
+      line-height: 1.6;
+      padding: 10px 20px;
+      margin: 10px 0;
+      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: #ffd700;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-weight: 400;
+      color: #e0e0e0;
+    }
+
+    .hero-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      border: 4px solid #ffd700;
+      margin: 20px 0;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      object-fit: cover;
+      width: 100%;
+    }
+
+    .hero-image:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px #ffd700;
+    }
+
+    .hero-name {
+      color: #00bfff;
+    }
+
+    .tap-instruction {
+      color: #ffcc00;
+    }
+
+    input {
+      padding: 12px 15px;
+      width: 70%;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px 8px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      background: #ffd700;
+      color: #1e1e2f;
+      font-weight: 600;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    button.clicked {
+      background-color: #2196f3 !important;
+      color: white !important;
+    }
+
+    button:hover {
+      background: #ffc107;
+      transform: scale(1.05);
+    }
+
+    #result {
+      font-size: 20px;
+      margin-top: 12px;
+      font-weight: 600;
+    }
+
+    #score, #highScore {
+      font-weight: bold;
+      color: #ffd700;
+    }
+
+    p {
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <button class="home-button" onclick="goHome()" title="Go to Home">
+    <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="#1e1e2f" viewBox="0 0 24 24">
+      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+    </svg>
+  </button>
+
+  <h1>GUESS ML HERO</h1>
+  <h2 class="hero-name">Name the Hero</h2>
+  <h2 class="tap-instruction">Tap the image to play Hero's Voice</h2>
+  <img id="heroImage" class="hero-image" src="" alt="Hero Image" onclick="playVoice()">
+  <p id="description"><em>Hero Description</em></p>
+
+  <input type="text" id="userAnswer" placeholder="Enter hero name">
+  <button id="submitBtn" onclick="submitAnswer(this)">SUBMIT</button>
+
+  <div id="result"></div>
+
+  <div>
+    <button onclick="restartGame(this)">RESTART</button>
+<button id="skipBtn" onclick="skipQuestion(this)">SKIP</button>
+  </div>
+
+  <p>Score: <span id="score">0</span></p>
+  <p>High Score: <span id="highScore">0</span></p>
+</div>
+
+<audio id="heroVoice"></audio>
+
+<script>
+  const heroList = [
+    "floryn.jpg", "alucard.jpg", "zilong.jpg", "beatrix.webp",
+    "brody.jpg", "cecilion.jpg", "chuo.jpg", "dyroth.jpg", "esmeralda.webp", "fanny.jpg", "akai.jpg", "harith.jpg", "hayabusa.jpg", "odette.webp", "julian.jpg", "lancelot.jpg", "lapulapu.jpg", "ling.jpg", "lunox.jpg", "melissa.webp", "miya.webp", "moskov.webp", "selena.jpg", "thamuz.jpg", "valentina.jpg", "xavier.jpg", "yin.jpg"
+  ];
+
+  const answerList = [
+    "FLORYN", "ALUCARD", "ZILONG", "BEATRIX",
+    "BRODY", "CECILION", "CHUO", "DYRROTH", "ESMERALDA", "FANNY", "AKAI", "HARITH", "HAYABUSA", "ODETTE", "JULIAN", "LANCELOT", "LAPU-LAPU", "LING", "LUNOX", "MELISSA", "MIYA", "MOSKOV", "SELENA", "THAMUZ", "VALENTINA", "XAVIER", "YIN"
+  ];
+
+  const descriptionColors = [
+    "#f39c12", "#0FFF50", "#1abc9c", "#FFFF33", "#3498db", "#2ecc71", "#FFD700",
+    "#f1c40f", "#16a085", "#FFB343", "#ffa500", "#00FFFF", "#121313", "#27ae60",
+    "#FFFFFF", "#fd79a8", "#C0C0C0", "#00cec9", "#81ecec", "#fab1a0", "#ffeaa7",
+    "#a29bfe", "#dfe6e9", "#74b9ff", "#55efc4", "#0FFF50", "#fdcb6e"
+  ];
+
+  const heroDescriptions = [
+    "The Budding Hope. A kind-hearted girl who is determined to spread greenery throughout the world.",
+    "Demon Hunter.  demon hunter with a deep hatred for demons.",
+    "Spear of Dragon. Guardian of the Dragon Altar and the Oriental Fighter who inherited the Cloud Dragon's power.",
+    "Dawnbreak Soldier. A gifted crack shot with a variety of strong and lively weapons.",
+    "The Lone Star. A solitary youth bearing the corruption of the Abyss.",
+    "Embrace of Night. An opera singer, a Blood Demon and Carmilla's Blood Demon lover.", 
+    "Kung Fu Boy. A kind and passionate Kung-Fu boy and A talented fighter with a heart of chivalry.", 
+    "Prince of the Abyss with wisdom and power. Prince of the Empire who was kidnapped and use by the Abyss.",
+    "Astrologer. Mysterious astrologer   and Falling Starmoon.",
+    "Blade Dancer in the battlefield. The female assassin who can fly across the sky.",
+    "Panda Warrior who likes rolling around. The almighty panda hero of Stream Valley.",
+    "Time Traveler. A quick-witted apprentice of magic.",
+    "Crimson Shadow. Leader of the Scarlet Shadow's Shadow sect, upon the Cadia Riverlands.",
+    "Swan Princess. Innocent princess that grew up in the Swan Castle and genius mage that excels in sword and scepter.",
+    "Scarlet Raven. A Raven assassin of the Church of Light, a young boy who's in search of his home.",
+    "Blade of Roses. A gifted young man who infuses the power of magic into his swordsmanship.",
+    "Courageous Blade. Hero who defends the Vonetis Islands from outsiders.",
+    "Cyan Finch. A graceful, free-soaring Finch and the Oriental Fighter who inherited the Vermillion Bird's power.",
+    "Twilight Goddess. A young mage who controls the powers of two opposing forces.",
+    "Cursed Needle. A girl with cursed needle who runs a tailor shop and solves problems for clients.",
+    "Moonlight Archer. An archer blessed by the Moon God.",
+    "Spear of Quiescence. The spearman who craves for vengeance.",
+    "Abyssal Witch. A deceiving young Dark Elf. and who fell into the Abyss.",
+    "Lord Lava. King of the Fire Demons.",
+    "Prophetess of the Night. The unpredictable shadow predator.",
+    "Defier of Light. Former member of the Knights of Light who's determined to forge a path of his own.",
+    "Martial Genius. A gifted Kungfu boy possessed by an Evil God."
+  ];
+
+  const heroVoices = [
+    "floryn.ogg", "alucard.ogx", "Zilong.ogx", "beatrix.ogx",
+    "brody.ogx", "cecilion.ogx", "chuo.ogx", "dyrroth.ogx", "esmeralda.ogx", "fanny.ogx", "akai.ogx", "harith.ogx", "hayabusa.ogx", "odette.ogx", "julian.ogx", "lancelot.ogx", "lapulapu.ogx", "ling.ogx", "lunox.ogx", "melissa.ogx", "miya.ogx", "moskov.ogx", "selena.ogx", "thamuz.ogx", "valentina.ogx", "xavier.ogx", "yin.ogx"
+  ];
+
+  let questionNumber = 0;
+  let score = 0;
+  let highScore = localStorage.getItem("mlHeroHighScore") || 0;
+  document.getElementById("highScore").innerText = highScore;
+
+function showQuestion() {
+  if (questionNumber < heroList.length) {
+    document.getElementById("heroImage").src = `images/${heroList[questionNumber]}`;
+    document.getElementById("description").innerHTML = `<strong><em>${heroDescriptions[questionNumber]}</em></strong>`;
+    document.getElementById("description").style.color = descriptionColors[questionNumber % descriptionColors.length];
+    document.getElementById("userAnswer").value = "";
+    document.getElementById("result").innerText = "";
+
+    // Show elements for active question
+    document.getElementById("heroImage").style.display = "block";
+    document.getElementById("description").style.display = "block";
+    document.getElementById("userAnswer").style.display = "inline-block";
+    document.getElementById("submitBtn").style.display = "inline-block";
+    document.getElementById("skipBtn").style.display = "inline-block";
+
+  } else {
+    // Quiz completed
+    document.getElementById("result").innerText = "Quiz Completed!";
+    document.getElementById("heroImage").style.display = "none";
+    document.getElementById("description").style.display = "none";
+    document.getElementById("userAnswer").style.display = "none";
+    document.getElementById("submitBtn").style.display = "none";
+    document.getElementById("skipBtn").style.display = "none";
+  }
+}
+
+  function highlightButton(button) {
+    button.classList.add('clicked');
+    setTimeout(() => {
+      button.classList.remove('clicked');
+    }, 200);
+  }
+
+  function submitAnswer(button) {
+    highlightButton(button);
+    const userAnswer = document.getElementById("userAnswer").value.trim();
+
+    if (userAnswer === "") {
+      document.getElementById("result").innerText = "Please enter a hero name!";
+      return;
+    }
+
+    const correctAnswer = answerList[questionNumber];
+
+    if (userAnswer.toUpperCase() === correctAnswer) {
+      document.getElementById("result").innerText = "Correct!";
+      score++;
+    } else {
+      document.getElementById("result").innerText = `Wrong, correct answer: ${correctAnswer}`;
+    }
+
+    document.getElementById("score").innerText = score;
+
+    // Update high score
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem("mlHeroHighScore", highScore);
+      document.getElementById("highScore").innerText = highScore;
+    }
+
+    setTimeout(() => {
+      questionNumber++;
+      showQuestion();
+    }, 2000);
+  }
+
+  function restartGame(button) {
+    highlightButton(button);
+    score = 0;
+    questionNumber = 0;
+    document.getElementById("score").innerText = score;
+    document.getElementById("highScore").innerText = highScore;
+    document.getElementById("heroImage").style.display = "block";
+    document.getElementById("description").style.display = "block";
+    document.getElementById("userAnswer").style.display = "inline-block";
+    showQuestion();
+  }
+
+  function skipQuestion(button) {
+    highlightButton(button);
+    questionNumber++;
+    showQuestion();
+  }
+
+  function playVoice() {
+    const audio = document.getElementById("heroVoice");
+    audio.src = `voices/${heroVoices[questionNumber]}`;
+    audio.play();
+  }
+
+function resetHighScore() {
+    // Removed this function
+  }
+
+  function goHome() {
+    window.location.href = "index.html";
+  }
+
+  // Initialize the game
+  showQuestion();
+</script>
+
+</body>
+</html>

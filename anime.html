@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Guess Wildrift Heroes</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background-color: black;
+      color: white;
+      overflow: hidden;
+    }
+
+    .container {
+      position: relative;
+      width: 100%;
+      height: 100dvh;
+      background-image: url('images/animebg.jpg');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      padding-bottom: 50px;
+    }
+
+    .header {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      background-color: #3f51b5;
+      color: white;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      padding: 16px;
+      z-index: 2;
+    }
+
+    .start-button {
+      background-color: black;
+      color: yellow;
+      font-weight: bold;
+      padding: 12px 24px;
+      font-size: 20px;
+      border: 2px solid yellow;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .start-button:hover {
+      background-color: yellow;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Music -->
+  <audio id="bgMusic" loop>
+    <source src="audio/animesound.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <div class="container">
+    <h1>Tap the screen</h1>
+    <div class="header">Welcome to Anime Fan Game</div>
+    <a href="GuessAnime.html">
+      <button class="start-button">START</button>
+    </a>
+  </div>
+
+  <script>
+    const bgMusic = document.getElementById("bgMusic");
+
+    function fadeInAudio(audio) {
+      audio.volume = 0;
+      let volume = 0;
+      const fadeInterval = setInterval(() => {
+        if (volume < 1) {
+          volume += 0.05;
+          audio.volume = Math.min(volume, 1);
+        } else {
+          clearInterval(fadeInterval);
+        }
+      }, 100);
+    }
+
+    window.addEventListener("load", () => {
+      const attemptPlay = bgMusic.play();
+
+      if (attemptPlay !== undefined) {
+        attemptPlay
+          .then(() => {
+            fadeInAudio(bgMusic);
+            console.log("Music started.");
+          })
+          .catch(() => {
+            console.warn("Autoplay blocked. Waiting for user interaction.");
+            const resumeOnClick = () => {
+              bgMusic.play().then(() => {
+                fadeInAudio(bgMusic);
+              });
+              document.removeEventListener("click", resumeOnClick);
+              document.removeEventListener("touchstart", resumeOnClick);
+            };
+            document.addEventListener("click", resumeOnClick);
+            document.addEventListener("touchstart", resumeOnClick);
+          });
+      }
+    });
+  </script>
+
+</body>
+</html>

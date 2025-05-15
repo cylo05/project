@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Guess Game</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: white;
+    }
+
+    header {
+      background-color: #3f51b5;
+      padding: 16px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .category {
+      margin: 16px;
+      text-align: center;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+    }
+
+    .category img {
+      width: 100%;
+      height: auto;
+      border: 4px solid #222;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+
+    .category img:hover {
+      transform: scale(1.03);
+    }
+
+    @media (min-width: 768px) {
+      .category img {
+        max-height: 300px;
+        object-fit: cover;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>GUESS GAME</header>
+
+<!-- Mobile Legends Category -->
+<div class="category">
+  <img src="images/ML.jpg" alt="Mobile Legends Category"
+       data-target="mlbb.html" data-video="videos/intro.mp4" class="play-video" />
+</div>
+
+<!-- Anime Quiz Category -->
+<div class="category">
+  <img src="images/anime.jpg" alt="Anime Quiz Category"
+       data-target="anime.html" data-video="videos/anime.mp4" class="play-video" />
+</div>
+
+<!-- League of Legends Category -->
+<div class="category">
+  <img src="images/wildrift.jpeg" alt="League of Legends Category"
+       data-target="WD.html" data-video="videos/wildrift.mp4" class="play-video" />
+</div>
+
+<!-- Video container (fullscreen overlay) -->
+<div id="videoContainer" style="display: none; position: fixed; inset: 0; background: black; z-index: 9999;">
+  <video id="introVideo" style="width: 100%; height: 100%; object-fit: cover;" autoplay></video>
+</div>
+<script>
+
+  const videoContainer = document.getElementById('videoContainer');
+  const introVideo = document.getElementById('introVideo');
+
+  document.querySelectorAll('.play-video').forEach(img => {
+    img.addEventListener('click', async function () {
+      const targetPage = this.getAttribute('data-target');
+      const videoSrc = this.getAttribute('data-video');
+
+      // Show video container and set source
+      videoContainer.style.display = 'block';
+      introVideo.src = videoSrc;
+
+      try {
+        // Request fullscreen
+        await introVideo.requestFullscreen();
+
+        // Lock screen orientation to landscape
+        if (screen.orientation && screen.orientation.lock) {
+          await screen.orientation.lock("landscape");
+        }
+      } catch (err) {
+        console.warn("Orientation lock or fullscreen failed:", err);
+      }
+
+      introVideo.play();
+
+      // When video ends, redirect and exit fullscreen
+      introVideo.onended = async function () {
+        try {
+          if (document.fullscreenElement) {
+            await document.exitFullscreen();
+          }
+          if (screen.orientation.unlock) {
+            screen.orientation.unlock(); // optional
+          }
+        } catch (err) {
+          console.warn("Failed to exit fullscreen:", err);
+        }
+
+        window.location.href = targetPage;
+      };
+    });
+  });
+</script>
+</body>
+</html>

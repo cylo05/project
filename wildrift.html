@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Guess the Wild Rift Hero</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    body {
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+      background: linear-gradient(135deg, #1e1e2f, #3e4a89);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      background: #ffffff10;
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      margin: 50px auto;
+      max-width: 600px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+      color: #fff;
+    }
+    h1 { font-size: 32px; margin-bottom: 10px; color: #ffd700; }
+    h2.hero-name { color: #00bfff; }
+    h2.tap-instruction { color: #ffcc00; }
+    .hero-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      border: 4px solid #ffd700;
+      margin: 20px 0;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hero-image:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px #ffd700;
+    }
+    #description {
+      font-size: 18px;
+      line-height: 1.6;
+      padding: 10px 20px;
+      margin: 10px 0;
+      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    input {
+      padding: 12px 15px;
+      width: 70%;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px 8px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      background: #ffd700;
+      color: #1e1e2f;
+      font-weight: 600;
+      transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+    button:hover {
+      background: #ffc107;
+      transform: scale(1.05);
+    }
+    button.clicked {
+      background-color: #2196f3 !important;
+      color: white !important;
+    }
+    #result {
+      font-size: 20px;
+      margin-top: 12px;
+      font-weight: 600;
+    }
+    #score {
+      font-weight: bold;
+      color: #ffd700;
+    }
+    .home-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: #ffd700;
+      border: none;
+      border-radius: 50%;
+      padding: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease, background-color 0.3s ease;
+      z-index: 999;
+    }
+    .home-button:hover {
+      background-color: #ffc107;
+      transform: scale(1.1);
+    }
+    .home-button svg {
+      width: 24px;
+      height: 24px;
+      fill: #1e1e2f;
+    }
+    #highScoreDisplay {
+      margin-top: 10px;
+      font-size: 18px;
+      color: #0fff50;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ✅ Home Button -->
+<button class="home-button" onclick="goHome()">
+  <svg viewBox="0 0 24 24">
+    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+  </svg>
+</button>
+
+<div class="container">
+  <h1>Guess Wild Rift Hero</h1>
+  <h2 class="hero-name">Name the Hero</h2>
+  <h2 class="tap-instruction">Tap the image to play Hero’s Voice</h2>
+
+  <img id="heroImage" class="hero-image" src="" alt="Hero Image" onclick="playVoice()">
+  <p id="description"><em>Hero Description</em></p>
+
+  <input type="text" id="userAnswer" placeholder="Enter hero name">
+  <button id="submitBtn" onclick="submitAnswer()">SUBMIT</button>
+
+  <div id="result"></div>
+
+  <div>
+    <button onclick="restartGame()">RESTART</button>
+    <button onclick="skipQuestion()">SKIP</button>
+  </div>
+
+  <p>Score: <span id="score">0</span></p>
+  <p id="highScoreDisplay"></p>
+</div>
+
+<audio id="heroVoice"></audio>
+
+<script>
+  const heroList = [
+    "yasuo.jpg", "jinx.jpg", "lucian.jpg", "masteryi.jpg",
+    "katarina.jpg", "akali.jpg", "zed.jpg", "zoe.jpg", "ezreal.jpg", "fiora.jpg", "fizz.webp", "garen.jpg", "gwen.jpg", "kaisa.jpg", "kayn.jpg", "lillia.webp", "viktor.webp", "ambessa.webp", "lulu.jpg", "lux.jpg", "milio.jpg", "nunu.jpg", "riven.jpg", "seraphine.jpg", "seth.jpg", "teemo.jpg", "tristana.jpg", "vayne.jpg", "yone.jpg", "akshan.jpg"
+  ];
+
+  const answerList = [
+    "YASUO", "JINX", "LUCIAN", "MASTER YI",
+    "KATARINA", "AKALI", "ZED", "ZOE", "EZREAL", "FIORA", "FIZZ", "GAREN", "GWEN", "KAISA", "KAYN", "LILLIA", "VIKTOR", "AMBESSA", "LULU", "LUX", "MILIO", "NUNU", "RIVEN", "SERAPHINE", "SETT", "TEEMO", "TRISTANA", "VAYNE", "YONE", "AKSHAN"
+  ];
+const descriptionColors = [
+  "#f39c12", "#0FFF50", "#1abc9c", "#a020f0", "#3498db", "#2ecc71", "#e67e22",
+  "#f1c40f", "#16a085", " #ff00ff", "#ffa500", "#BC13FE", "#1F51FF", "#27ae60",
+  "#FFB343", "#fd79a8", "#6c5ce7", "#00cec9", "#81ecec", "#fab1a0", "#ffeaa7",
+  "#a29bfe", "#dfe6e9", "#74b9ff", "#55efc4", "#ff7675", "#fdcb6e", "#87CEFA",
+  "#b2bec3", "#00b894"
+];
+  const heroDescriptions = [
+    "The Unforgiven. is an agile swordsman who wields the air itself against his enemies. As a proud young man, he was falsely accused of murdering his master unable to prove his innocence, he was forced to slay his own brother in self defense.",
+    "The Loose Cannon. A manic and impulsive criminal from Zaun, With an arsenal of deadly weapons, she unleashes the loudest blasts and brightest explosions to leave a trail of mayhem and panic in her wake.",
+    "The Purifier. A Sentinel of Light, is a grim hunter of undying spirits, pursuing them relentlessly and annihilating them with his twin relic pistols.",
+    "The Wuju Bladesman. He is a skilled, mobile AD fighter, particularly effective in the jungle. He excels at dealing damage and chasing enemies, especially after unlocking his ultimate, Highlander.",
+    "The Sinister Blade. She is a mid-lane assassin champion known for her ability to snowball and secure kills, especially when ahead. She's a melee champion with a high burst damage potential, relying on her abilities and passive to deal magic damage to enemies.",
+    "The Rogue Assasin. She now strikes alone, ready to be the deadly weapon her people need. She has pledged to defend  Ionia from its enemies, one kill at a time.", 
+    "The Master of Shadows. He is a ruthless and powerful Ionian assassin who leads the Order of Shadow. He uses forbidden shadow magic to destroy anything he deems a threat to his nation or his new order, which involves militarizing Ionia's magical and martial traditions.", 
+    "The Aspect of Twilight. A cosmic messenger of Targon who heralds major events and changes. She embodies mischief, imagination, and change, often causing cataclysms without conscious intent.",
+    "The Prodigal Explorer. He's a prodigal explorer from Piltover, the son of famed archaeologists, who is driven by adventure and a thirst for knowledge.",
+    "The Grand Duelist. A skilled duelist and the youngest daughter of the noble Laurent family in Demacia, known for her agility and fierce determination. She is a top lane champion with a focus on one-on-one combat and dueling, skilled at dishing out damage and surviving in the heat of battle.",
+    "The Tidal Trickster. An  amphibious Yordle who dwells near Bilgewater's reefs. He's a skilled assassin known for his burst damage and mobility, making him a challenging opponent in both mid and jungle roles.",
+    "The Might of Demacia. A proud and noble warrior of the Crownguard family, serving as a Dauntless Vanguard in Demacia. He's known for his unwavering duty to defend Demacia and its ideals, often facing mages and sorcerers with his mighty sword.",
+    "The Hallowed Seamstress. A champion with a unique backstory. Initially a doll, she is brought to life by magic and embarks on her own journey. She is known for her abilities to cut enemies, deal damage based on health, and use a mist to evade attacks.",
+    "Daughter of the Void. She's a champion known for her adaptability and ability to evolve her abilities through item purchases, allowing her to deal both magic and physical damage.",
+    "The Shadow Reaper. His struggle with the Darkin weapon Rhaast and his desire to become a powerful Shadow Assassin. He is a peerless practitioner of lethal shadow magic, seeking to lead the Order of Shadow into a new era of Ionian supremacy.",
+    "The Bashful Bloom. A shy fawn spirit who was once the guardian of a sacred Ionian forest before it was destroyed, leaving her with a sense of loss. She embodies rejuvenation and time, using her censer to calm and soothe.",
+    "Herald of Arcane. A brilliant inventor, he's driven by the belief that embracing technological advancement is key to unlocking humanity's full potential.",
+    "The Matriarch of War. A Noxian warlord and the estranged mother of Mel Medarda, is a formidable figure in the Wild Rift. She is known for her ruthless leadership, strategic mind, and unwavering commitment to the Medarda family's legacy.",
+    "The Fae Sorceress. A Yordle mage known for her empathy and whimsical magic, often accompanied by her fairy Pix. She's portrayed as a carefree and caring individual who enjoys helping others and exploring the world.",
+    "The Lady of Luminosity. A  Demacian mage who can bend light to her will. She's from a noble family with a strong magical lineage, but in Demacia, magic is viewed with suspicion and fear.",
+    "The Gentle Flame. A warmhearted boy from Ixtal who has mastered fire and discovered soothing fire, allowing him to heal and support his allies. He aims to help his family escape exile by joining the Yun Tal, inspired by his grandmother's journey.",
+    "The Boy and His Yeti. A boy and his magical yeti companion, Willump, who are bound by ancient power and a love for snowballs. They explore the Freljord, seeking his missing mother and striving to become heroes.",
+    "The Exile. A skilled, though troubled, ex-Noxian warhost. After witnessing the brutality of Noxus's actions, particularly during the invasion of Ionia, she shattered her loyalty and sought redemption by wandering the land.",
+    "The Starry-Eyed Songstress. She  is a mage from Piltover with Zaunite parents who can hear the souls of others, making the world sing to her. She uses her music-inspired abilities to perform for the sister cities, reminding them of their strength and potential.",
+    "The Boss. A powerful Ionian fighter who rose from humble beginnings in the fighting pits of Navori to become a leader of Ionia's criminal underworld. He's known for his savage strength and ability to take punishment, earning him control over the pits he once fought in.",
+    "The Swift Scout. A small, swift, and mischievous Yordle who is the captain of the Bandle City Scouts. He's known for his survival skills, his enthusiasm for the Bandle Scouts, and his reputation as a cunning and, some might say, annoying opponent.",
+    "The Yordle Gunner. A centers around her wanderlust and her desire to protect the bandlewoods, where she discovered her love for warriors.  She is known for her scaling range, which increases with her Draw a Bead passive.",
+    "The Night Hunter. A remorseless Demacian huntress who relentlessly pursues evil-doers, particularly those of the dark arts, after her family was murdered by a demon.",
+    "The Unforgotten. One of redemption and the pursuit of understanding after being resurrected from the spirit realm. He was once a skilled swordsman and half-brother of Yasuo.",
+    "The Rogue Sentinel. A Shuriman youth who, witnessing injustice in his city, becomes a Sentinel of Light. He was found by his mentor, Shadya, after being left for dead by warlords, who then raised him and trained him to fight the forces of darkness.",
+  ];
+  const heroVoices = [
+    "yasuo.mp3", "jinx.mp3", "lucian.mp3", "masteryi.mp3",
+    "katarina.mp3", "akali.mp3", "zed.mp3", "zoe.mp3", "ezreal.mp3", "fiora.MP3", "fizz.mp3", "garen.MP3", "gwen.mp3", "kaisa.mp3", "kayn.mp3", "lillia.MP3", "viktor.MP3", "ambessa.MP3", "lulu.MP3", "lux.mp3", "milio.MP3", "nunu.MP3", "riven.MP3", "seraphine.mp3", "sett.mp3", "teemo.MP3", "tristana.MP3", "vayne.MP3", "yone.mp3", "akshan.MP3"
+  ];
+
+  let questionNumber = 0;
+  let score = 0;
+  let highScore = localStorage.getItem("highScore") || 0;
+
+  document.getElementById("highScoreDisplay").innerText = `High Score: ${highScore}`;
+
+  function goHome() {
+    window.location.href = "index.html"; // replace as needed
+  }
+
+  function highlightButton(button) {
+    button.classList.add('clicked');
+    setTimeout(() => button.classList.remove('clicked'), 200);
+  }
+
+  function showQuestion() {
+    if (questionNumber >= heroList.length) {
+      document.getElementById("result").innerText = "🎉 Quiz Completed!";
+      document.getElementById("heroImage").style.display = "none";
+      document.getElementById("description").style.display = "none";
+      document.getElementById("userAnswer").style.display = "none";
+      document.getElementById("submitBtn").style.display = "none";
+      document.querySelector("button[onclick='skipQuestion()']").style.display = "none";
+
+      if (score > highScore) {
+        localStorage.setItem("highScore", score);
+        document.getElementById("highScoreDisplay").innerText = `🥇 New High Score: ${score}`;
+      } else {
+        document.getElementById("highScoreDisplay").innerText = `High Score: ${highScore}`;
+      }
+
+      return;
+    }
+
+    document.querySelector("button[onclick='skipQuestion()']").style.display = "inline-block";
+    document.getElementById("heroImage").src = `images/${heroList[questionNumber]}`;
+    document.getElementById("description").innerHTML = `<strong><em>${heroDescriptions[questionNumber]}</em></strong>`;
+    document.getElementById("description").style.color = descriptionColors[questionNumber % descriptionColors.length];
+    document.getElementById("userAnswer").value = "";
+    document.getElementById("result").innerText = "";
+  }
+
+  function submitAnswer() {
+    const button = document.getElementById("submitBtn");
+    highlightButton(button);
+
+    const userInput = document.getElementById("userAnswer").value.trim();
+    if (userInput === "") {
+      document.getElementById("result").innerText = "Please Enter A Hero Name!";
+      return;
+    }
+
+    const formattedInput = userInput.toUpperCase();
+    const correctAnswer = answerList[questionNumber];
+
+    if (formattedInput === correctAnswer) {
+      document.getElementById("result").innerText = "✅ Correct!";
+      score++;
+    } else {
+      document.getElementById("result").innerText = `❌ Wrong! The correct answer is ${correctAnswer}`;
+    }
+
+    document.getElementById("score").innerText = score;
+
+    setTimeout(() => {
+      questionNumber++;
+      showQuestion();
+    }, 1500);
+  }
+
+  function skipQuestion() {
+    questionNumber++;
+    showQuestion();
+  }
+
+  function restartGame() {
+    questionNumber = 0;
+    score = 0;
+    document.getElementById("score").innerText = score;
+    document.getElementById("heroImage").style.display = "block";
+    document.getElementById("description").style.display = "block";
+    document.getElementById("userAnswer").style.display = "inline-block";
+    document.getElementById("submitBtn").style.display = "inline-block";
+    document.getElementById("result").innerText = "";
+    showQuestion();
+  }
+
+  function playVoice() {
+    const audio = document.getElementById("heroVoice");
+    audio.src = `voices/${heroVoices[questionNumber]}`;
+    audio.play();
+  }
+
+  // 🔰 Start the game
+  showQuestion();
+</script>
+
+</body>
+</html>

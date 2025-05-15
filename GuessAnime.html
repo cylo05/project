@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Guess Anime Character</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap');
+
+    body {
+      font-family: 'Rubik', sans-serif;
+      text-align: center;
+      background: linear-gradient(135deg, #1e1e2f, #3e4a89);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+
+    .home-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: #ffd700;
+      border: none;
+      border-radius: 50%;
+      padding: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, background-color 0.3s ease;
+      z-index: 999;
+    }
+
+    .home-button:hover {
+      background-color: #ffc107;
+      transform: scale(1.1);
+    }
+
+    .container {
+      background: #ffffff10;
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      margin: 50px auto;
+      max-width: 600px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: #ffd700;
+    }
+
+#description {
+  font-size: 16px;
+  line-height: 1.6;
+  padding: 15px;
+  border-radius: 10px;
+  margin: 20px 0;
+  font-weight: bold;      /* Makes text bold */
+  font-style: italic;     /* Makes text italic */
+  text-shadow: 1px 1px 2px #000;
+}
+
+    video {
+      width: 100%;
+      border-radius: 12px;
+      border: 4px solid #ffd700;
+      margin: 20px 0;
+    }
+
+    input {
+      padding: 12px 15px;
+      width: 70%;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px 8px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      background: #ffd700;
+      color: #1e1e2f;
+      font-weight: 600;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    button:hover {
+      background: #ffc107;
+      transform: scale(1.05);
+    }
+
+    #result {
+      font-size: 20px;
+      margin-top: 12px;
+      font-weight: 600;
+    }
+
+    #score, #highScore {
+      font-weight: bold;
+      color: #ffd700;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button class="home-button" onclick="goHome()" title="Go Home">
+      <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="#1e1e2f"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    </button>
+
+    <h1>Guess the Anime Character</h1>
+    <video id="animeVideo" controls></video>
+    <p id="description"></p>
+
+    <input type="text" id="answerInput" placeholder="Type your answer here">
+    <div>
+      <button onclick="submitAnswer()">Submit</button>
+      <button onclick="skipQuestion()">Skip</button>
+      <button onclick="restartGame()">Restart Game</button>
+    </div>
+
+    <div id="result"></div>
+    <p>Score: <span id="score">0</span></p>
+    <p>High Score: <span id="highScore">0</span></p>
+  </div>
+
+  <script>
+    const animeList = [
+      "videos/luffy.mp4", "videos/natsu.mp4", "videos/wilserfort.mp4", "videos/kiyotaka.mp4", "videos/naruto.mp4",
+      "videos/ichigo.mp4", "videos/gojo.mp4", "videos/guko.mp4", "videos/sakura.mp4", "videos/hajime.mp4", 
+      "videos/isagi.mp4", "videos/nagi.mp4", "videos/zoro.mp4", "videos/jinwoo.mp4", "videos/mash.mp4", 
+      "videos/gon.mp4", "videos/kilua.mp4"
+    ];
+
+    const answerList = [
+      "LUFFY", "NATSU", "WILL", "AYANKOJI", "NARUTO", "ICHIGO", "GOJO", "GUKO",
+      "SAKURA", "HAJIME", "ISAGI", "NAGI", "ZORO", "JINWOO", "MASH", "GON", "KILLUA"
+    ];
+
+const descriptionColors = [
+  "#ffcc00", "#00d9ff", "#ff4081", "#aaff00", "#ffa500", "#8a2be2", "#00fa9a", "#ff6347", 
+  "#1e90ff", "#32cd32", "#ff69b4", "#f4a460", "#20b2aa", "#ff1493", "#dc143c", "#7b68ee", "#ff7f50"
+];
+
+    const descriptionList = [
+      "Also known as Straw Hat, and later on Joy Boy and Sun God Nika.He is the main protagonist of the One Piece franchise. The captain of the Straw Hat Pirates, He seeks to find the One Piece treasure and become the King of the Pirates.",
+      "He is a Mage of the Fairy Tail Guild.He is also among the five Dragon Slayers sent to the future from four hundred years past, having an additional purpose in the assistance of the defeat of Acnologia.",
+      "A student at Regarden Magical Academy.He is unable to use magic and relies on physical abilities to win his battles. His goal is to reach the top of the Mercedes Caulis and reunite with his childhood friend/love interest Elfaria Albis Serfort.",
+      "He is an inconspicuous and unobtrusive student, and while his grades are average (on purpose), he possesses a sagacious ability to read the emotions of people around him with pinpoint accuracy and either helps or destroys them.",
+      "He is a shinobi of Konohagakure's Uzumaki clan.He became the jinchūriki of the Nine-Tails on the day of his birth a fate that caused him to be shunned by most of Konoha throughout his childhood.",
+      "He is the protagonist of the Bleach manga and anime series, known for his unique heritage as a Soul Reaper, Quincy, and Hollow hybrid. He's characterized by his rebellious, hot-headed personality and a strong desire to protect his loved ones.",
+       "He is one of the main protagonists of the Jujutsu Kaisen series.He is a special grade jujutsu sorcerer and widely recognized as the strongest in the world. He is  the first person to inherit both the Limitless and the Six Eyes in four hundred years.",
+       "He is a Saiyan raised on Earth and the main protagonist of the Dragon Ball series.The husband of Chi-Chi, and the father of Gohan and Goten.",
+      "He is the main protagonist.He is a first-year student at Furin High School and a member of the Bofurin gang, a group dedicated to protecting civilians in Makochi. He initially aims to rise through the ranks of the Bofurin, but his journey involves learning about leadership and forming alliances along the way.",
+      "He is an easygoing, friendly person and leader of bofurin gang. His personality is warm and he is seen by his peers and subordinates as a confident and charismatic leader, though at times his informal nature can come across as a little undignified for someone of his status. He is often shown to be very proud of and encouraging to his team.",
+      "He is a second-year student at Ichinan High School who was a player for the school's football team.  He's main goal is to become the world's best striker.",
+      "He is a character known for his exceptional natural talent and lack of motivation in the Blue Lock manga. He's initially portrayed as a lazy, introverted individual with no interest in football, preferring a carefree lifestyle. However, his natural ability and the influence of his friend Reo gradually lead him to embrace his potential and become a skilled player.",
+      "He  is a muscular, tall young man with lightly tanned skin, known for his distinctive green haramaki (sash) that holds his three swords. He is a skilled swordsman and a member of the Straw Hat Pirates, with a notable, albeit awkward, personality.",
+      "A man initially the weakest E-Rank Hunter, who discovers a unique ability to level up and gain power through the System. He evolves from a humble, family-oriented individual to the world's strongest hunter, known for his relentless pursuit of strength and unwavering determination to protect his loved ones. He is a complex character, capable of both immense compassion and ruthless efficiency in battle.",
+      "A rare young man who cannot use magic. Although he crushes all types of magic with his well-trained muscles, he lacks common sense and tends to do as he pleases. He loves cream puffs.",
+      "He is a 12-year-old boy who becomes a Hunter to find his father, Ging, who is also a Hunter. He is known for his naive and optimistic personality, strong willpower, and a unique bond with animals due to his childhood spent in the woods.",
+      "He is a pivotal character in Hunter x Hunter, known as one of the most skilled assassins in his family's history. He is a member of the Zoldyck family, an infamous clan of assassins, and was trained to become one since birth. While initially portrayed as a cheerful and mischievous boy, He later reveals his deadly and violent side, showcasing his natural aptitude for assassination."
+    ];
+
+ let score = 0;
+    let highScore = localStorage.getItem('animeHighScore') || 0;
+    let questionNumber = 0;
+    document.getElementById('highScore').innerText = highScore;
+
+    function showQuestion() {
+      if (questionNumber >= animeList.length) {
+        document.getElementById('result').innerText = `🎉 Quiz Over! Final Score: ${score}/${animeList.length}`;
+        if (score > highScore) {
+          highScore = score;
+          localStorage.setItem('animeHighScore', highScore);
+          document.getElementById('highScore').innerText = highScore;
+        }
+        return;
+      }
+
+      const video = document.getElementById('animeVideo');
+      video.src = animeList[questionNumber];
+      video.load();
+      video.play();
+
+      document.getElementById('description').innerHTML = `<span style="color: ${descriptionColors[questionNumber]}">${descriptionList[questionNumber]}</span>`;
+      document.getElementById('answerInput').value = '';
+      document.getElementById('result').innerText = '';
+    }
+
+function submitAnswer() {
+  const userAnswer = document.getElementById('answerInput').value.trim().toUpperCase();
+  const correctAnswer = answerList[questionNumber];
+
+  if (userAnswer === correctAnswer) {
+    score++;
+    document.getElementById('result').innerText = "✅ Correct!";
+  } else {
+    document.getElementById('result').innerText = `❌ Wrong. Correct: ${correctAnswer}`;
+  }
+
+  document.getElementById('score').innerText = score;
+
+  // Move to next question after a short delay
+  setTimeout(() => {
+    questionNumber++;
+    showQuestion();
+  }, 1500); // 1.5 seconds
+}
+
+    function skipQuestion() {
+      questionNumber++;
+      showQuestion();
+    }
+
+    function restartGame() {
+      score = 0;
+      questionNumber = 0;
+      document.getElementById('score').innerText = score;
+      document.getElementById('result').innerText = '';
+      showQuestion();
+    }
+function goHome() {
+  // Change the URL to your actual home page if needed
+  window.location.href = "index.html";
+}
+    document.getElementById('answerInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') submitAnswer();
+    });
+
+    // Initialize first question
+    showQuestion();
+  </script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Guess Wildrift Heroes</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: black;
+      color: white;
+      overflow: hidden;
+    }
+
+    .container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      background-image: url('images/wildriftwallpaper.jpg');
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      padding-bottom: 50px;
+    }
+
+    .header {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      background-color: #3f51b5;
+      color: white;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      padding: 16px;
+      z-index: 2;
+    }
+
+    .start-button {
+      background-color: black;
+      color: yellow;
+      font-weight: bold;
+      padding: 12px 24px;
+      font-size: 20px;
+      border: 2px solid yellow;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .start-button:hover {
+      background-color: yellow;
+      color: black;
+    }
+
+    #clickOverlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 9999;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Music (play only once) -->
+  <audio id="bgMusic">
+    <source src="audio/wildriftsound.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- Overlay to capture first interaction -->
+  <div id="clickOverlay"></div>
+
+  <div class="container">
+    <h1>Tap the screen</h1>
+    <div class="header">Welcome to Wildrift</div>
+    <a href="wildrift.html">
+      <button class="start-button">START</button>
+    </a>
+  </div>
+
+  <script>
+    const bgMusic = document.getElementById('bgMusic');
+    const overlay = document.getElementById('clickOverlay');
+    let hasPlayed = false;
+
+    overlay.addEventListener('click', () => {
+      if (!hasPlayed) {
+        bgMusic.volume = 0; // Start silent
+        bgMusic.play().then(() => {
+          // Gradually fade in
+          let volume = 0;
+          const fadeInterval = setInterval(() => {
+            if (volume < 1) {
+              volume += 0.05;
+              bgMusic.volume = Math.min(volume, 1);
+            } else {
+              clearInterval(fadeInterval);
+            }
+          }, 100); // Increase volume every 100ms (approx. 2 seconds total)
+        }).catch(() => {
+          console.warn("Autoplay blocked.");
+        });
+
+        hasPlayed = true;
+        overlay.style.display = 'none';
+      }
+    });
+
+    // Optional: hide overlay if sound ends
+    bgMusic.addEventListener('ended', () => {
+      overlay.style.display = 'none';
+    });
+  </script>
+
+</body>
+</html>
